@@ -1,0 +1,924 @@
+=====================================================================
+CONVERSATION HISTORY FORMAT & MULTI-TURN EXAMPLES
+=====================================================================
+
+CONVERSATION HISTORY STRUCTURE:
+Each message in convo_history must have:
+  - role: "user" or "assistant"
+  - timestamp: ISO format (e.g., "2025-11-22T10:00:00Z")
+  - message: The actual message text
+
+Example Structure:
+```python
+convo_history = [
+    {
+        "role": "user",
+        "timestamp": "2025-11-22T10:00:00Z",
+        "message": "Schedule a dentist appointment for tomorrow at 2pm"
+    },
+    {
+        "role": "assistant",
+        "timestamp": "2025-11-22T10:00:05Z",
+        "message": "I've scheduled your dentist appointment for tomorrow at 2pm"
+    },
+    {
+        "role": "user",
+        "timestamp": "2025-11-22T10:01:00Z",
+        "message": "What time is my dentist appointment?"
+    }
+]
+```
+
+---------------------------------------------------------------------
+Example 1: User Asks About Previous Event
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T10:00:00Z",
+      "message": "Schedule a dentist appointment for tomorrow at 2pm"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T10:00:05Z",
+      "message": "I've scheduled your dentist appointment for tomorrow at 2pm"
+    }
+  ]
+  query: "What time is my dentist appointment?"
+
+Output (Chatbot):
+  {
+    "response_type": "response",
+    "content": "Your dentist appointment is scheduled for tomorrow at 2pm"
+  }
+
+Output (Classifier):
+  {
+    "response_type": "response"
+  }
+
+---------------------------------------------------------------------
+Example 2: Follow-up to Previous Task
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T09:00:00Z",
+      "message": "I need to buy groceries"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T09:00:05Z",
+      "message": "I've added 'buy groceries' to your tasks"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T09:01:00Z",
+      "message": "Add milk, eggs, and bread to the list"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T09:01:05Z",
+      "message": "Added milk, eggs, and bread to your grocery list"
+    }
+  ]
+  query: "Also add coffee and bananas"
+
+Output (Chatbot):
+  {
+    "response_type": "task",
+    "content": "Add coffee and bananas to the grocery list"
+  }
+
+Output (Classifier):
+  {
+    "response_type": "task"
+  }
+
+---------------------------------------------------------------------
+Example 3: Asking About Previous Note
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T08:00:00Z",
+      "message": "Save this: WiFi password is SecurePass123"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T08:00:05Z",
+      "message": "I've saved the WiFi password: SecurePass123"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T14:30:00Z",
+      "message": "Also note that the network name is HomeOffice_5G"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T14:30:05Z",
+      "message": "Noted: Network name is HomeOffice_5G"
+    }
+  ]
+  query: "What's the WiFi password again?"
+
+Output (Chatbot):
+  {
+    "response_type": "response",
+    "content": "The WiFi password is SecurePass123"
+  }
+
+Output (Classifier):
+  {
+    "response_type": "response"
+  }
+
+---------------------------------------------------------------------
+Example 4: Reschedule Previous Event
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T10:00:00Z",
+      "message": "Schedule team meeting for Friday at 3pm"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T10:00:05Z",
+      "message": "Team meeting scheduled for Friday at 3pm"
+    }
+  ]
+  query: "Can we move it to 4pm instead?"
+
+Output (Chatbot):
+  {
+    "response_type": "event",
+    "content": "Reschedule team meeting to 4pm",
+    "date": "2025-11-29",
+    "time": "16:00"
+  }
+
+Output (Classifier):
+  {
+    "response_type": "event",
+    "date": "2025-11-29",
+    "time": "16:00"
+  }
+
+---------------------------------------------------------------------
+Example 5: Complex Multi-Turn with Mixed Types
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T09:00:00Z",
+      "message": "Hi, I need help organizing my week"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T09:00:05Z",
+      "message": "I'd be happy to help you organize your week! What would you like to do?"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T09:01:00Z",
+      "message": "I have a project deadline on Monday"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T09:01:05Z",
+      "message": "I've noted your project deadline for Monday, November 25th"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T09:02:00Z",
+      "message": "Also schedule a client meeting on Wednesday at 2pm"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T09:02:05Z",
+      "message": "Client meeting scheduled for Wednesday at 2pm"
+    }
+  ]
+  query: "Add a task to prepare slides before the meeting"
+
+Output (Chatbot):
+  {
+    "response_type": "task",
+    "content": "Prepare slides before the client meeting",
+    "date": "2025-11-27"
+  }
+
+Output (Classifier):
+  {
+    "response_type": "task",
+    "date": "2025-11-27"
+  }
+
+---------------------------------------------------------------------
+Example 6: Referencing All Previous Items
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T08:00:00Z",
+      "message": "Meeting with John tomorrow at 10am"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T08:00:05Z",
+      "message": "Meeting with John scheduled for tomorrow at 10am"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T08:05:00Z",
+      "message": "Buy groceries today"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T08:05:05Z",
+      "message": "Added 'buy groceries' to your tasks for today"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T08:10:00Z",
+      "message": "Remember: John's email is john@company.com"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T08:10:05Z",
+      "message": "Saved John's email: john@company.com"
+    }
+  ]
+  query: "What do I have scheduled for tomorrow?"
+
+Output (Chatbot):
+  {
+    "response_type": "response",
+    "content": "You have a meeting with John tomorrow at 10am"
+  }
+
+Output (Classifier):
+  {
+    "response_type": "response"
+  }
+
+---------------------------------------------------------------------
+Example 7: Asking for Summary of Previous Tasks
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T09:00:00Z",
+      "message": "Add these tasks: 1. Call dentist 2. Pay bills 3. Email Sarah"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T09:00:05Z",
+      "message": "I've added three tasks: call dentist, pay bills, and email Sarah"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T10:00:00Z",
+      "message": "Also add: finish report by Friday"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T10:00:05Z",
+      "message": "Added task: finish report by Friday"
+    }
+  ]
+  query: "What tasks do I have?"
+
+Output (Chatbot):
+  {
+    "response_type": "response",
+    "content": "You have the following tasks: 1. Call dentist, 2. Pay bills, 3. Email Sarah, 4. Finish report by Friday"
+  }
+
+Output (Classifier):
+  {
+    "response_type": "response"
+  }
+
+---------------------------------------------------------------------
+Example 8: Modifying Previous Note
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T11:00:00Z",
+      "message": "Sarah's phone number is 555-1234"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T11:00:05Z",
+      "message": "Saved Sarah's phone number: 555-1234"
+    }
+  ]
+  query: "Actually, it's 555-5678"
+
+Output (Chatbot):
+  {
+    "response_type": "note",
+    "content": "Sarah's phone number is 555-5678 (updated)"
+  }
+
+Output (Classifier):
+  {
+    "response_type": "note"
+  }
+
+---------------------------------------------------------------------
+Example 9: Context-Dependent Task Creation
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T13:00:00Z",
+      "message": "I'm planning a birthday party for next Saturday"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T13:00:05Z",
+      "message": "Great! Birthday party event created for next Saturday, November 30th"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T13:01:00Z",
+      "message": "It's at 5pm at the park"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T13:01:05Z",
+      "message": "Updated: Birthday party at 5pm at the park"
+    }
+  ]
+  query: "Remind me to buy cake and decorations"
+
+Output (Chatbot):
+  {
+    "response_type": "task",
+    "content": "Buy cake and decorations for the birthday party",
+    "date": "2025-11-30"
+  }
+
+Output (Classifier):
+  {
+    "response_type": "task",
+    "date": "2025-11-30"
+  }
+
+---------------------------------------------------------------------
+Example 10: Long Conversation with Multiple Event Types
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T08:00:00Z",
+      "message": "Good morning!"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T08:00:05Z",
+      "message": "Good morning! How can I help you today?"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T08:01:00Z",
+      "message": "Schedule dentist for Wednesday 3pm"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T08:01:05Z",
+      "message": "Dentist appointment scheduled for Wednesday at 3pm"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T08:02:00Z",
+      "message": "Add task: buy birthday gift for mom"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T08:02:05Z",
+      "message": "Task added: buy birthday gift for mom"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T08:03:00Z",
+      "message": "Note: Mom's favorite color is blue"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T08:03:05Z",
+      "message": "Noted: Mom's favorite color is blue"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T08:04:00Z",
+      "message": "When is mom's birthday?"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T08:04:05Z",
+      "message": "I don't have that information saved yet. Would you like to tell me?"
+    },
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T08:05:00Z",
+      "message": "It's December 10th"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T08:05:05Z",
+      "message": "Saved: Mom's birthday is December 10th"
+    }
+  ]
+  query: "What's my schedule for Wednesday?"
+
+Output (Chatbot):
+  {
+    "response_type": "response",
+    "content": "On Wednesday, you have a dentist appointment at 3pm"
+  }
+
+Output (Classifier):
+  {
+    "response_type": "response"
+  }
+
+
+=====================================================================
+BEST PRACTICES FOR CONVERSATION HISTORY
+=====================================================================
+
+1. ALWAYS include both user and assistant messages in order
+2. Use proper ISO 8601 timestamp format
+3. Include ALL previous exchanges, not just recent ones
+4. Keep the actual message text in the "message" field
+5. The chatbot uses history to understand context and references
+
+VALID TIMESTAMP FORMATS:
+  ✓ "2025-11-22T10:00:00Z"
+  ✓ "2025-11-22T10:00:00+00:00"
+  ✓ "2025-11-22T14:30:00-05:00"
+
+CONVERSATION HISTORY HELPS WITH:
+  - Understanding "it", "that", "the meeting" references
+  - Recalling previously mentioned information
+  - Providing context for follow-up questions
+  - Maintaining conversation coherence
+  - Answering "What did I say about..." questions
+
+
+=====================================================================
+
+The chatbot function classifies queries AND generates conversational responses.
+
+---------------------------------------------------------------------
+Example 1: General Greeting
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Hello, how are you?"
+
+Output:
+  {
+    "response_type": "response",
+    "content": "I'm an artificial intelligence, so I don't have feelings, but I'm here and ready to assist you. How can I help you today?"
+  }
+
+---------------------------------------------------------------------
+Example 2: Schedule an Event
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Schedule a team meeting tomorrow at 3pm"
+
+Output:
+  {
+    "response_type": "event",
+    "content": "Schedule a team meeting",
+    "date": "2025-11-23",
+    "time": "15:00"
+  }
+
+---------------------------------------------------------------------
+Example 3: Create a Task
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Buy groceries - milk, eggs, bread"
+
+Output:
+  {
+    "response_type": "task",
+    "content": "Buy groceries - milk, eggs, bread"
+  }
+
+---------------------------------------------------------------------
+Example 4: Save a Note
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "WiFi password is SecurePass123"
+
+Output:
+  {
+    "response_type": "note",
+    "content": "WiFi password is SecurePass123"
+  }
+
+---------------------------------------------------------------------
+Example 5: Task with Deadline
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Submit the quarterly report by Friday 5pm"
+
+Output:
+  {
+    "response_type": "task",
+    "content": "Submit the quarterly report",
+    "date": "2025-11-29",
+    "time": "17:00"
+  }
+
+---------------------------------------------------------------------
+Example 6: Question (Response Type)
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "What's the weather like today?"
+
+Output:
+  {
+    "response_type": "response",
+    "content": "I don't have access to real-time weather data. You can check your local weather app or website for current conditions."
+  }
+
+---------------------------------------------------------------------
+Example 7: Event with Specific Date
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Doctor appointment on December 5th at 2:30pm"
+
+Output:
+  {
+    "response_type": "event",
+    "content": "Doctor appointment",
+    "date": "2025-12-05",
+    "time": "14:30"
+  }
+
+---------------------------------------------------------------------
+Example 8: Note with Date
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Sarah's birthday is March 15th"
+
+Output:
+  {
+    "response_type": "note",
+    "content": "Sarah's birthday",
+    "date": "2026-03-15"
+  }
+
+---------------------------------------------------------------------
+Example 9: With Conversation History
+---------------------------------------------------------------------
+Input:
+  convo_history: [
+    {
+      "role": "user",
+      "timestamp": "2025-11-22T10:00:00Z",
+      "message": "Hi there"
+    },
+    {
+      "role": "assistant",
+      "timestamp": "2025-11-22T10:00:05Z",
+      "message": "Hello! How can I help you today?"
+    }
+  ]
+  query: "Can you help me schedule a doctor appointment?"
+
+Output:
+  {
+    "response_type": "response",
+    "content": "Of course! I'd be happy to help you schedule a doctor appointment. When would you like to schedule it?"
+  }
+
+---------------------------------------------------------------------
+Example 10: Urgent Task
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "URGENT: Fix the production bug today!"
+
+Output:
+  {
+    "response_type": "task",
+    "content": "URGENT: Fix the production bug",
+    "date": "2025-11-22"
+  }
+
+---------------------------------------------------------------------
+Example 11: Complex Event with Location
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Team lunch with Sarah and Mike at downtown bistro on Friday at noon"
+
+Output:
+  {
+    "response_type": "event",
+    "content": "Team lunch with Sarah and Mike at downtown bistro",
+    "date": "2025-11-29",
+    "time": "12:00"
+  }
+
+---------------------------------------------------------------------
+Example 12: Shopping List Task
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Buy 2 dozen eggs, 5 pounds flour, 3 bottles olive oil"
+
+Output:
+  {
+    "response_type": "task",
+    "content": "Buy 2 dozen eggs, 5 pounds flour, 3 bottles olive oil"
+  }
+
+---------------------------------------------------------------------
+Example 13: Thanks / Acknowledgment
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Thank you so much for your help!"
+
+Output:
+  {
+    "response_type": "response",
+    "content": "You're welcome! I'm happy to help. Let me know if you need anything else."
+  }
+
+---------------------------------------------------------------------
+Example 14: Recipe Note
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Grandma's cake recipe: 2 cups flour, 1 cup sugar, 3 eggs"
+
+Output:
+  {
+    "response_type": "note",
+    "content": "Grandma's cake recipe: 2 cups flour, 1 cup sugar, 3 eggs"
+  }
+
+---------------------------------------------------------------------
+Example 15: Recurring Event
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Gym every Monday, Wednesday, and Friday at 7am"
+
+Output:
+  {
+    "response_type": "event",
+    "content": "Gym every Monday, Wednesday, and Friday",
+    "time": "07:00"
+  }
+
+
+=====================================================================
+CLASSIFIER FUNCTION - Examples with Input and Output
+=====================================================================
+
+The classifier function ONLY identifies the type and extracts dates/times.
+It does NOT generate conversational responses.
+
+---------------------------------------------------------------------
+Example 1: General Greeting
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Hello, how are you?"
+
+Output:
+  {
+    "response_type": "response"
+  }
+
+---------------------------------------------------------------------
+Example 2: Schedule an Event
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Schedule a team meeting tomorrow at 3pm"
+
+Output:
+  {
+    "response_type": "event",
+    "date": "2025-11-23",
+    "time": "15:00"
+  }
+
+---------------------------------------------------------------------
+Example 3: Create a Task
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Buy groceries - milk, eggs, bread"
+
+Output:
+  {
+    "response_type": "task"
+  }
+
+---------------------------------------------------------------------
+Example 4: Save a Note
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "WiFi password is SecurePass123"
+
+Output:
+  {
+    "response_type": "note"
+  }
+
+---------------------------------------------------------------------
+Example 5: Task with Deadline
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Submit report by Friday 5pm"
+
+Output:
+  {
+    "response_type": "task",
+    "date": "2025-11-29",
+    "time": "17:00"
+  }
+
+---------------------------------------------------------------------
+Example 6: Question (Response Type)
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "What is the weather today?"
+
+Output:
+  {
+    "response_type": "response"
+  }
+
+---------------------------------------------------------------------
+Example 7: Event with Specific Date
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Doctor appointment on December 5th at 2:30pm"
+
+Output:
+  {
+    "response_type": "event",
+    "date": "2025-12-05",
+    "time": "14:30"
+  }
+
+---------------------------------------------------------------------
+Example 8: Note with Date
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Sarah's birthday is March 15th"
+
+Output:
+  {
+    "response_type": "event",
+    "date": "2026-03-15"
+  }
+
+---------------------------------------------------------------------
+Example 9: Multiple Tasks
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "1. Call dentist 2. Buy groceries 3. Finish report"
+
+Output:
+  {
+    "response_type": "task"
+  }
+
+---------------------------------------------------------------------
+Example 10: Travel Note
+---------------------------------------------------------------------
+Input:
+  convo_history: []
+  query: "Flight to Boston on Dec 10 at 6am"
+
+Output:
+  {
+    "response_type": "event",
+    "date": "2025-12-10",
+    "time": "06:00"
+  }
+
+
+=====================================================================
+KEY DIFFERENCES BETWEEN CHATBOT AND CLASSIFIER
+=====================================================================
+
+CHATBOT:
+- Returns: response_type, content (with conversational reply), date, time
+- Purpose: Full conversational AI assistant
+- Temperature: 0.7 (more creative responses)
+- Use case: User-facing chatbot interface
+
+CLASSIFIER:
+- Returns: response_type, date, time (NO content field)
+- Purpose: Classification only, no response generation
+- Temperature: 0.3 (more consistent classification)
+- Use case: Backend processing, automation, routing queries
+
+
+=====================================================================
+RESPONSE TYPES EXPLAINED
+=====================================================================
+
+response:
+  - General conversation
+  - Questions that don't require creating items
+  - Acknowledgments, greetings, thanks
+  - Information requests
+
+event:
+  - Time-specific activities
+  - Appointments, meetings
+  - Scheduled occasions
+  - Usually has date and/or time
+
+note:
+  - Information to remember
+  - Passwords, phone numbers, addresses
+  - Important facts or details
+  - May include dates (birthdays, anniversaries)
+
+task:
+  - Action items
+  - Todos, errands
+  - Things that need to be done
+  - May include deadlines (date/time)
+
+
+=====================================================================
+USAGE IN CODE
+=====================================================================
+
+Python Example - Chatbot:
+```python
+from chatbot import chatbot
+
+# Simple usage
+result = chatbot([], "Schedule meeting tomorrow at 3pm")
+print(result["response_type"])  # "event"
+print(result["content"])        # "Schedule meeting tomorrow"
+print(result["date"])          # "2025-11-23"
+print(result["time"])          # "15:00"
+
+# With conversation history
+history = [
+    {"role": "user", "timestamp": "...", "message": "Hi"},
+    {"role": "assistant", "timestamp": "...", "message": "Hello!"}
+]
+result = chatbot(history, "What can you do?")
+```
+
+Python Example - Classifier:
+```python
+from classifier import classifier
+
+# Simple usage
+result = classifier([], "Buy groceries tonight")
+print(result["response_type"])  # "task"
+# Note: No "content" field - only classification
+
+# Check if date exists
+if "date" in result:
+    print(f"Deadline: {result['date']}")
+```
